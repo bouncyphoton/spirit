@@ -1,6 +1,9 @@
 #ifndef SPIRIT_CORE_H
 #define SPIRIT_CORE_H
 
+#include "platform.h"
+#include <string>
+
 class Core {
 public:
     Core() = default;
@@ -8,6 +11,12 @@ public:
     [[noreturn]] void run();
 
     [[noreturn]] void quit();
+
+    [[noreturn]] void logFatal(const std::string& msg);
+
+    void logInfo(const std::string& msg);
+
+    Config config = {};
 private:
     void init();
 
@@ -17,7 +26,7 @@ private:
 
     void render();
 
-    bool m_running = true;
+    Platform m_platform;
 };
 
 extern Core *core;
