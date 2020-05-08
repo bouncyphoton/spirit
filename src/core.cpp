@@ -57,11 +57,13 @@ void Core::init() {
 
     m_platform.init();
     m_spriteShader.init(sprite_vertex_src, sprite_fragment_src);
+    m_textureAtlas.init("../assets/", 16, 16);
     m_spriteBatch.init();
 }
 
 void Core::cleanup() {
     m_spriteBatch.destroy();
+    m_textureAtlas.destroy();
     m_spriteShader.destroy();
     m_platform.destroy();
 }
@@ -73,9 +75,10 @@ void Core::update() {
 
     u32 w = 1;
     u32 h = 1;
-    constexpr u32 n = 7;
+    constexpr u32 numColors = 7;
+    constexpr u32 numSprites = 3;
 
-    glm::vec4 colors[n] = {
+    glm::vec4 colors[numColors] = {
             glm::vec4(1.00, 0.00, 0.00, 1.00), // red
             glm::vec4(1.00, 0.50, 0.00, 1.00), // orange
             glm::vec4(1.00, 1.00, 0.00, 1.00), // yellow
@@ -85,9 +88,15 @@ void Core::update() {
             glm::vec4(0.30, 0.00, 0.50, 1.00), // violet
     };
 
-    glm::vec2 bl = glm::vec2(w * n, h) * -0.5f;
-    for (u32 i = 0; i < n; ++i) {
-        m_spriteBatch.addSprite(bl + glm::vec2(w * i, 0), glm::vec2(w, h), colors[i]);
+    glm::vec4 uvs[numSprites] = {
+            m_textureAtlas.getUv("zombie.png"),
+            m_textureAtlas.getUv("zombie_armored_0.png"),
+            m_textureAtlas.getUv("zombie_armored_1.png"),
+    };
+
+    glm::vec2 bl = glm::vec2(w * numColors, h) * -0.5f;
+    for (u32 i = 0; i < numColors; ++i) {
+        m_spriteBatch.addSprite(bl + glm::vec2(w * i, 0), glm::vec2(w, h), uvs[i % numSprites], colors[i]);
     }
 }
 

@@ -18,13 +18,13 @@ void SpriteBatch::init() {
     glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, position));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, position));
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, uv));
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, color));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, color));
 
     glBindVertexArray(0);
 }
@@ -34,11 +34,11 @@ void SpriteBatch::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec4 color) {
-    Vertex v0{p0, glm::vec2(0, 0), color};
-    Vertex v1{p1, glm::vec2(1, 0), color};
-    Vertex v2{p2, glm::vec2(1, 1), color};
-    Vertex v3{p3, glm::vec2(0, 1), color};
+void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec4 uv, glm::vec4 color) {
+    Vertex v0{p0, glm::vec2(uv.x, uv.y), color};
+    Vertex v1{p1, glm::vec2(uv.z, uv.y), color};
+    Vertex v2{p2, glm::vec2(uv.z, uv.w), color};
+    Vertex v3{p3, glm::vec2(uv.x, uv.w), color};
 
     m_vertices.emplace_back(v0);
     m_vertices.emplace_back(v1);
@@ -49,12 +49,12 @@ void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 
     m_vertices.emplace_back(v3);
 }
 
-void SpriteBatch::addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, glm::vec4 color) {
+void SpriteBatch::addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, glm::vec4 uv, glm::vec4 color) {
     addSprite(bottom_left,
-            bottom_left + glm::vec2(dimensions.x, 0),
-            bottom_left + dimensions,
-            bottom_left + glm::vec2(0, dimensions.y),
-            color);
+              bottom_left + glm::vec2(dimensions.x, 0),
+              bottom_left + dimensions,
+              bottom_left + glm::vec2(0, dimensions.y),
+              uv, color);
 }
 
 void SpriteBatch::draw() {

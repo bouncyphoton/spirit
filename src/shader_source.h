@@ -31,8 +31,10 @@ in VertexData {
     vec4 color;
 } i;
 
+uniform sampler2D uAtlas;
+
 void main() {
-    oFragColor = i.color;
+    oFragColor = i.color * texture(uAtlas, i.uv);
 }
 )";
 

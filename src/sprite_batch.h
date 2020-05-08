@@ -19,9 +19,9 @@ public:
 
     void destroy();
 
-    void addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec4 color = glm::vec4(1));
+    void addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec4 uv, glm::vec4 color = glm::vec4(1));
 
-    void addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, glm::vec4 color = glm::vec4(1));
+    void addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, glm::vec4 uv, glm::vec4 color = glm::vec4(1));
 
     void draw();
 

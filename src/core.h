@@ -3,6 +3,7 @@
 
 #include "platform.h"
 #include "shader.h"
+#include "texture_atlas.h"
 #include "sprite_batch.h"
 #include "camera.h"
 #include <string>
@@ -32,6 +33,7 @@ private:
 
     Platform m_platform;
     Shader m_spriteShader;
+    TextureAtlas m_textureAtlas;
     SpriteBatch m_spriteBatch;
 
     Camera m_camera;

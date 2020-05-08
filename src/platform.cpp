@@ -32,6 +32,9 @@ void Platform::init() {
         core->logFatal("Failed to initialize gl3w");
     }
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     SDL_GL_SetSwapInterval(0);
 }
 
