@@ -96,18 +96,16 @@ void Core::render() {
 
     m_spriteShader.bind();
 
-    glm::vec2 cameraPos = glm::vec2(0, 0);
-
     // calculate view matrix
-    glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(-cameraPos, 0));
+    glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(-m_camera.position, 0));
 
     // calculate projection matrix
     f32 aspect_ratio = (f32) config.frameWidth / (f32) config.frameHeight;
     glm::mat4 proj = glm::ortho<float>(
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * aspect_ratio,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f * aspect_ratio,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * aspect_ratio * m_camera.distance,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f * aspect_ratio * m_camera.distance,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * m_camera.distance,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f * m_camera.distance
     );
 
     // set view projection matrix

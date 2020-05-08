@@ -4,6 +4,7 @@
 #include "platform.h"
 #include "shader.h"
 #include "sprite_batch.h"
+#include "camera.h"
 #include <string>
 
 class Core {
@@ -32,6 +33,8 @@ private:
     Platform m_platform;
     Shader m_spriteShader;
     SpriteBatch m_spriteBatch;
+
+    Camera m_camera;
 };
 
 extern Core *core;
