@@ -19,6 +19,7 @@ public:
     void logInfo(const std::string& msg);
 
     Config config = {};
+    bool m_frameResized = true;
 private:
     void init();
 

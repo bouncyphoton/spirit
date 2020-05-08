@@ -13,13 +13,13 @@ out VertexData {
     vec4 color;
 } o;
 
-uniform mat4 uProjectionMatrix;
+uniform mat4 uViewProjectionMatrix;
 
 void main() {
     o.uv = aUv;
     o.color = aColor;
 
-    gl_Position = uProjectionMatrix * vec4(aPosition, 0, 1);
+    gl_Position = uViewProjectionMatrix * vec4(aPosition, 0, 1);
 }
 )";
 

@@ -1,5 +1,6 @@
 #include "core.h"
 #include "shader_source.h"
+#include "constants.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <GL/gl3w.h>
 #include <cstdlib>
@@ -16,6 +17,15 @@ void Core::run() {
     // Main loop runs until quit() is called
     while (true) {
         m_platform.update();
+
+        if (m_frameResized) {
+            m_frameResized = false;
+
+            // Update viewport
+            glViewport(0, 0, config.frameWidth, config.frameHeight);
+
+            logInfo("Resized to " + std::to_string(config.frameWidth) + "x" + std::to_string(config.frameHeight));
+        }
 
         update();
 
@@ -57,25 +67,26 @@ void Core::cleanup() {
 }
 
 void Core::update() {
-    // TODO
+    // TODO: real game updates
+
     m_spriteBatch.clear();
 
-    int w = 75;
-    int h = 75;
-    constexpr int n = 7;
+    u32 w = 1;
+    u32 h = 1;
+    constexpr u32 n = 7;
 
     glm::vec4 colors[n] = {
-            glm::vec4(1.0, 0.0, 0.0, 1),
-            glm::vec4(1, 0.5, 0, 1),
-            glm::vec4(1, 1, 0, 1),
-            glm::vec4(0, 1, 0, 1),
-            glm::vec4(0, 0, 1, 1),
-            glm::vec4(0.25, 0, 1, 1),
-            glm::vec4(0.3, 0, 0.5, 1),
+            glm::vec4(1.00, 0.00, 0.00, 1.00), // red
+            glm::vec4(1.00, 0.50, 0.00, 1.00), // orange
+            glm::vec4(1.00, 1.00, 0.00, 1.00), // yellow
+            glm::vec4(0.00, 1.00, 0.00, 1.00), // green
+            glm::vec4(0.00, 0.00, 1.00, 1.00), // blue
+            glm::vec4(0.25, 0.00, 1.00, 1.00), // indigo
+            glm::vec4(0.30, 0.00, 0.50, 1.00), // violet
     };
 
-    glm::vec2 bl = glm::vec2(config.frameWidth / 2.0f - w * n / 2.0f, config.frameHeight / 2.0f - h / 2.0f);
-    for (int i = 0; i < n; ++i) {
+    glm::vec2 bl = glm::vec2(w * n, h) * -0.5f;
+    for (u32 i = 0; i < n; ++i) {
         m_spriteBatch.addSprite(bl + glm::vec2(w * i, 0), glm::vec2(w, h), colors[i]);
     }
 }
@@ -85,9 +96,22 @@ void Core::render() {
 
     m_spriteShader.bind();
 
-    // Set matrix
-    glm::mat4 projection = glm::ortho<float>(0, config.frameWidth, 0, config.frameHeight);
-    m_spriteShader.setMat4("uProjectionMatrix", projection);
+    glm::vec2 cameraPos = glm::vec2(0, 0);
+
+    // calculate view matrix
+    glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(-cameraPos, 0));
+
+    // calculate projection matrix
+    f32 aspect_ratio = (f32) config.frameWidth / (f32) config.frameHeight;
+    glm::mat4 proj = glm::ortho<float>(
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * aspect_ratio,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f * aspect_ratio,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f
+    );
+
+    // set view projection matrix
+    m_spriteShader.setMat4("uViewProjectionMatrix", proj * view);
 
     // Texture atlas is bound to texture unit 0
     m_spriteShader.setInt("uAtlas", 0);
@@ -95,5 +119,5 @@ void Core::render() {
     // Draw sprites
     m_spriteBatch.draw();
 
-    // TODO: Draw calls for sprites
+    // TODO: more sophisticated rendering system for different textures
 }
