@@ -15,7 +15,7 @@ void Platform::init() {
     // sdl window
     m_window = SDL_CreateWindow("spirit",
                                 SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                core->config.windowWidth, core->config.windowHeight, SDL_WINDOW_OPENGL);
+                                core->config.frameWidth, core->config.frameHeight, SDL_WINDOW_OPENGL);
     if (!m_window) {
         core->logFatal("Failed to create window");
     }

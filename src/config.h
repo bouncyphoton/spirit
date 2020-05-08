@@ -4,8 +4,8 @@
 #include "types.h"
 
 struct Config {
-    u32 windowWidth;
-    u32 windowHeight;
+    u32 frameWidth;
+    u32 frameHeight;
 };
 
 #endif //SPIRIT_CONFIG_H

@@ -2,6 +2,8 @@
 #define SPIRIT_CORE_H
 
 #include "platform.h"
+#include "shader.h"
+#include "sprite_batch.h"
 #include <string>
 
 class Core {
@@ -27,6 +29,8 @@ private:
     void render();
 
     Platform m_platform;
+    Shader m_spriteShader;
+    SpriteBatch m_spriteBatch;
 };
 
 extern Core *core;
