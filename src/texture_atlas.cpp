@@ -19,11 +19,30 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
         core->logFatal("Texture atlas directory is not valid");
     }
 
-    core->logInfo("Loading textures with dimensions " + std::to_string(w) + "x" + std::to_string(h));
-
     // Load texture data for textures we want
     std::vector<u8 *> textureData;
     std::unordered_map<std::string, u32> textureIndices;
+
+    // Allocate missing texture data
+    u8 *missingTextureData = (u8 *) calloc(w * h * 4, sizeof(u8));
+    if (!missingTextureData) {
+        core->logFatal("Failed to allocate memory for missing texture data");
+    }
+    // Generate missing texture data
+    for (u32 i = 0; i < w * h * 4; i += 4) {
+        u32 x = (i / 4) % w;
+        u32 y = (i / 4) / w;
+        missingTextureData[i + 3] = 255;
+        if ((x >= w / 2 && y < h / 2) || (x < w / 2 && y >= h / 2)) {
+            missingTextureData[i + 0] = 255;
+            missingTextureData[i + 2] = 255;
+        }
+    }
+    // Add missing texture
+    textureIndices["*missing"] = textureData.size();
+    textureData.emplace_back(missingTextureData);
+
+    // Add textures in given directory
     for (auto &p : std::filesystem::recursive_directory_iterator(dir)) {
         // Ignore non-png files
         if (p.path().extension() != ".png") {
@@ -38,14 +57,14 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
         if (currentW == w && currentH == h) {
             std::string textureName = p.path().string().substr(directory.length());
 
-            core->logInfo("Loading texture \"" + textureName + "\"");
-
             textureIndices[textureName] = textureData.size();
             textureData.emplace_back(data);
         } else {
             free(data);
         }
     }
+
+    core->logInfo("Creating texture atlas with " + std::to_string(textureData.size()) + " " + std::to_string(w) + "x" + std::to_string(h) + " textures");
 
     // Generate texture data
     // TODO: assume textures are square for now
@@ -110,5 +129,9 @@ void TextureAtlas::destroy() {
 }
 
 glm::vec4 TextureAtlas::getUv(const std::string &name) {
+    if (m_uvMap.find(name) == m_uvMap.end()) {
+        core->logWarn("Texture \"" + name + "\" not found in atlas");
+        m_uvMap[name] = m_uvMap["*missing"];
+    }
     return m_uvMap[name];
 }

@@ -54,9 +54,14 @@ void Platform::update() {
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        core->m_frameResized = true;
+                        core->frameResized = true;
                         core->config.frameWidth = event.window.data1;
                         core->config.frameHeight = event.window.data2;
+
+                        // TODO: (HACK) Find real solution. Lines appear when height is odd number
+                        if (core->config.frameHeight % 2 == 1) {
+                            ++core->config.frameHeight;
+                        }
                         break;
                 }
         }
