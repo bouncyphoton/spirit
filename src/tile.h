@@ -6,7 +6,7 @@
 #include <vector>
 
 enum TileIdEnum : u32 {
-    GRASS_ID,
+    TILE_GRASS_ID,
     NUM_TILES
 };
 
