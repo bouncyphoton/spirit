@@ -76,6 +76,8 @@ void Core::cleanup() {
 }
 
 void Core::update() {
+    camera.distance = (sin(SDL_GetTicks() / 1000.0f) * 0.5f + 0.5) * 10 + 0.01;
+
     m_world.update();
 }
 

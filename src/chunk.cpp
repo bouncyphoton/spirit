@@ -25,7 +25,7 @@ void Chunk::populate(std::vector<Entity> &entities) {
         entities.back().id = ENTITY_TEST_ID;
         entities.back().frame = rand() % core->assetManager.getNumFrames(entities.back().id);
         entities.back().position = glm::vec2(rand() / (f32) RAND_MAX, rand() / (f32) RAND_MAX)
-                                     * (f32) (consts::CHUNK_SIZE - 1) + m_offset;
+                                   * (f32) (consts::CHUNK_SIZE - 1) + m_offset;
         entities.back().dimensions = glm::vec2(1);
     }
 }
@@ -45,8 +45,10 @@ void Chunk::draw() {
             u32 x = i % consts::CHUNK_SIZE;
             u32 y = i / consts::CHUNK_SIZE;
 
+            // TODO: See if there is a better solution to separating lines than adding 0.001 to dimensions
             m_tileSpriteBatch.addSprite(glm::vec2(x, y) + m_offset,
-                                        glm::vec2(consts::TILE_SIZE_METERS), core->assetManager.getTileUv(m_tiles[i]));
+                                        glm::vec2(consts::TILE_SIZE_METERS + 0.001),
+                                        core->assetManager.getTileUv(m_tiles[i]));
         }
     }
 
