@@ -64,7 +64,8 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
         }
     }
 
-    core->logInfo("Creating texture atlas with " + std::to_string(textureData.size()) + " " + std::to_string(w) + "x" + std::to_string(h) + " textures");
+    core->logInfo("Creating texture atlas with " + std::to_string(textureData.size()) + " "
+                  + std::to_string(w) + "x" + std::to_string(h) + " textures");
 
     // Generate texture data
     // TODO: assume textures are square for now

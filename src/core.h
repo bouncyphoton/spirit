@@ -37,6 +37,7 @@ private:
     void update();
 
     void render();
+
     Platform m_platform;
     Shader m_spriteShader;
 

@@ -9,7 +9,7 @@ void AssetManager::init() {
 
     // Go over each tile
     m_tileUvs.reserve(tileInfoList.size());
-    for (TileInfo& tile : tileInfoList) {
+    for (TileInfo &tile : tileInfoList) {
         // Associate uvs in texture atlas with texture variants
         m_tileUvs.emplace_back();
         m_tileUvs.back().reserve(tile.numVariants);
@@ -23,7 +23,7 @@ void AssetManager::init() {
 
     // Go over each entity
     m_entityUvs.reserve(entityInfoList.size());
-    for (EntityInfo& entity : entityInfoList) {
+    for (EntityInfo &entity : entityInfoList) {
         // Associate uvs in texture atlas with frames of entity
         m_entityUvs.emplace_back();
         m_entityUvs.back().reserve(entity.numFrames);

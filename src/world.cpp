@@ -17,7 +17,7 @@ void World::init() {
 }
 
 void World::destroy() {
-    for (auto& chunk : m_chunks) {
+    for (auto &chunk : m_chunks) {
         chunk.destroy();
     }
 

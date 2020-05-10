@@ -21,6 +21,7 @@ public:
 
 private:
     static void checkCompileStatus(u32 shader);
+
     static void checkLinkStatus(u32 program);
 
     u32 m_programId = 0;

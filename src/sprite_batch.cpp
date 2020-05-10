@@ -34,11 +34,11 @@ void SpriteBatch::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec4 uv, glm::vec4 color) {
-    Vertex v0{p0, glm::vec2(uv.x, uv.y), color};
-    Vertex v1{p1, glm::vec2(uv.z, uv.y), color};
-    Vertex v2{p2, glm::vec2(uv.z, uv.w), color};
-    Vertex v3{p3, glm::vec2(uv.x, uv.w), color};
+void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec4 uv, glm::vec4 tint) {
+    Vertex v0{p0, glm::vec2(uv.x, uv.y), tint};
+    Vertex v1{p1, glm::vec2(uv.z, uv.y), tint};
+    Vertex v2{p2, glm::vec2(uv.z, uv.w), tint};
+    Vertex v3{p3, glm::vec2(uv.x, uv.w), tint};
 
     // TODO: to optimize performance, move away from std::vector
 
@@ -51,12 +51,12 @@ void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 
     m_vertices.emplace_back(v3);
 }
 
-void SpriteBatch::addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, glm::vec4 uv, glm::vec4 color) {
+void SpriteBatch::addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, glm::vec4 uv, glm::vec4 tint) {
     addSprite(bottom_left,
               bottom_left + glm::vec2(dimensions.x, 0),
               bottom_left + dimensions,
               bottom_left + glm::vec2(0, dimensions.y),
-              uv, color);
+              uv, tint);
 }
 
 void SpriteBatch::draw() {

@@ -15,9 +15,11 @@ public:
     void destroy();
 
     glm::vec4 getTileUv(Tile &tile);
+
     u8 getNumVariants(TileIdEnum id);
 
     glm::vec4 getEntityUv(Entity &entity);
+
     u8 getNumFrames(EntityIdEnum id);
 
 private:
