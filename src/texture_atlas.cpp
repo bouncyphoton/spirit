@@ -39,13 +39,13 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
         }
     }
     // Add missing texture
-    textureIndices["*missing"] = textureData.size();
+    textureIndices[consts::MISSING_TEXTURE_NAME] = textureData.size();
     textureData.emplace_back(missingTextureData);
 
     // Add textures in given directory
     for (auto &p : std::filesystem::recursive_directory_iterator(dir)) {
         // Ignore non-png files
-        if (p.path().extension() != ".png") {
+        if (p.path().extension() != consts::TEXTURE_EXTENSION) {
             continue;
         }
 

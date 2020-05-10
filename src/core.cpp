@@ -59,23 +59,24 @@ void Core::init() {
     config.frameWidth = 800;
     config.frameHeight = 600;
 
-    m_camera.position = glm::vec2(4, 4);
+    camera.position = glm::vec2(consts::CHUNK_SIZE * consts::TILE_SIZE_METERS * 0.5f);
 
     m_platform.init();
+    assetManager.init();
     m_spriteShader.init(sprite_vertex_src, sprite_fragment_src);
-    textureAtlas.init("../assets/", 16, 16);
+
     m_world.init();
 }
 
 void Core::cleanup() {
     m_world.destroy();
-    textureAtlas.destroy();
     m_spriteShader.destroy();
+    assetManager.destroy();
     m_platform.destroy();
 }
 
 void Core::update() {
-    // TODO: real game updates
+    m_world.update();
 }
 
 void Core::render() {
@@ -84,15 +85,15 @@ void Core::render() {
     m_spriteShader.bind();
 
     // calculate view matrix
-    glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(-m_camera.position, 0));
+    glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(-camera.position, 0));
 
     // calculate projection matrix
     f32 aspect_ratio = (f32) config.frameWidth / (f32) config.frameHeight;
     glm::mat4 proj = glm::ortho<float>(
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * aspect_ratio * m_camera.distance,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f * aspect_ratio * m_camera.distance,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * m_camera.distance,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT *  0.5f * m_camera.distance
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * aspect_ratio * camera.distance,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * 0.5f * aspect_ratio * camera.distance,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * camera.distance,
+            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * 0.5f * camera.distance
     );
 
     // set view projection matrix
@@ -101,7 +102,6 @@ void Core::render() {
     // Texture atlas is bound to texture unit 0
     m_spriteShader.setInt("uAtlas", 0);
 
+    // Draw world (tiles and entities)
     m_world.draw();
-
-    // TODO: more sophisticated rendering system for different textures
 }

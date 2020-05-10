@@ -4,8 +4,9 @@
 #include "platform.h"
 #include "shader.h"
 #include "texture_atlas.h"
-#include "sprite_batch.h"
+#include "asset_manager.h"
 #include "camera.h"
+#include "sprite_batch.h"
 #include "world.h"
 #include <string>
 
@@ -24,9 +25,11 @@ public:
     void logWarn(const std::string &msg);
 
     Config config = {};
-    TextureAtlas textureAtlas;
+    AssetManager assetManager;
+    Camera camera;
     bool frameResized = true;
 private:
+
     void init();
 
     void cleanup();
@@ -34,11 +37,9 @@ private:
     void update();
 
     void render();
-
     Platform m_platform;
     Shader m_spriteShader;
 
-    Camera m_camera;
     World m_world;
 };
 
