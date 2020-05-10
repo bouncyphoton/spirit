@@ -40,6 +40,8 @@ void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 
     Vertex v2{p2, glm::vec2(uv.z, uv.w), color};
     Vertex v3{p3, glm::vec2(uv.x, uv.w), color};
 
+    // TODO: to optimize performance, move away from std::vector
+
     m_vertices.emplace_back(v0);
     m_vertices.emplace_back(v1);
     m_vertices.emplace_back(v2);

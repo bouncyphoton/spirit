@@ -16,10 +16,10 @@ public:
     void draw();
 
 private:
-    SpriteBatch m_tileSpriteBatch;
-    SpriteBatch m_entitySpriteBatch;
-
     std::vector<Chunk> m_chunks;
+    std::vector<Entity> m_entities;
+
+    SpriteBatch m_entitySpriteBatch;
 };
 
 #endif //SPIRIT_WORLD_H
