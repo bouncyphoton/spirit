@@ -98,12 +98,19 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
     }
 
     // Get uvs for textures in atlas
+    const f32 UV_EPSILON = 1.0f / sideLengthPixels / 4.0f;
     for (auto &t : textureIndices) {
         u32 i = t.second;
         u32 x = i % (sideLengthImages);
         u32 y = (sideLengthImages) - 1 - i / (sideLengthImages);
 
-        m_uvMap[t.first] = glm::vec4(x, y, x + 1, y + 1) / glm::vec4(sideLengthImages);
+
+        m_uvMap[t.first] = glm::vec4(
+                x + UV_EPSILON,
+                y + UV_EPSILON,
+                x + 1.0f - UV_EPSILON,
+                y + 1.0f - UV_EPSILON
+        ) / glm::vec4(sideLengthImages);
     }
 
     // Generate OpenGL texture

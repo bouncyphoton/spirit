@@ -45,9 +45,7 @@ void Chunk::draw() {
             u32 x = i % consts::CHUNK_SIZE;
             u32 y = i / consts::CHUNK_SIZE;
 
-            // TODO: See if there is a better solution to separating lines than adding 0.001 to dimensions
-            m_tileSpriteBatch.addSprite(glm::vec2(x, y) + m_offset,
-                                        glm::vec2(consts::TILE_SIZE_METERS + 0.001),
+            m_tileSpriteBatch.addSprite(glm::vec2(x, y) + m_offset, glm::vec2(consts::TILE_SIZE_METERS),
                                         core->assetManager.getTileUv(m_tiles[i]));
         }
     }
