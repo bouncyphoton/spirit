@@ -14,6 +14,8 @@ public:
 
     void destroy();
 
+    glm::vec4 getWhiteUv();
+
     glm::vec4 getTileUv(Tile &tile);
 
     u8 getNumVariants(TileIdEnum id);

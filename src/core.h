@@ -10,6 +10,10 @@
 #include "world.h"
 #include <string>
 
+struct FrameStats {
+    u32 chunksDrawn = 0;
+};
+
 class Core {
 public:
     Core() = default;
@@ -25,8 +29,10 @@ public:
     void logWarn(const std::string &msg);
 
     Config config = {};
+    FrameStats frameStats = {};
     AssetManager assetManager;
     Camera camera;
+    SpriteBatch debugBatch;
     bool frameResized = true;
 private:
 

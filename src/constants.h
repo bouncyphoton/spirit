@@ -8,6 +8,12 @@ namespace consts {
     // How many in-game meters tall the 2D camera "frustum" is at default zoom
     static constexpr f32 DEFAULT_CAMERA_FRUSTUM_HEIGHT = 10.0f;
 
+    // Maximum "distance" camera can be
+    static constexpr f32 CAMERA_MAX_DISTANCE = 4.0f;
+
+    // Minimum "distance" camera can be
+    static constexpr f32 CAMERA_MIN_DISTANCE = 0.5f;
+
     // Number of tiles wide a chunk is
     static constexpr u32 CHUNK_SIZE = 8;
 
@@ -18,6 +24,8 @@ namespace consts {
     static constexpr const char *TEXTURE_EXTENSION = ".png";
 
     static constexpr const char *MISSING_TEXTURE_NAME = "*missing";
+
+    static constexpr const char *WHITE_TEXTURE_NAME = "*white";
 }
 
 #endif //SPIRIT_CONSTANTS_H

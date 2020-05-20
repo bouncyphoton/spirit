@@ -27,9 +27,13 @@ void Core::run() {
             logInfo("Resized to " + std::to_string(config.frameWidth) + "x" + std::to_string(config.frameHeight));
         }
 
+        frameStats = {};
+
         update();
 
         render();
+
+        logInfo(std::to_string(frameStats.chunksDrawn));
 
         m_platform.swapBuffers();
     }
@@ -64,19 +68,23 @@ void Core::init() {
     m_platform.init();
     assetManager.init();
     m_spriteShader.init(sprite_vertex_src, sprite_fragment_src);
+    debugBatch.init();
 
     m_world.init();
 }
 
 void Core::cleanup() {
     m_world.destroy();
+    debugBatch.destroy();
     m_spriteShader.destroy();
     assetManager.destroy();
     m_platform.destroy();
 }
 
 void Core::update() {
-    camera.distance = (sin(SDL_GetTicks() / 1000.0f) * 0.5f + 0.5) * 10 + 0.01;
+    camera.distance = (sin(SDL_GetTicks() / 1000.0f) * 0.5f + 0.5)
+                      * (consts::CAMERA_MAX_DISTANCE - consts::CAMERA_MIN_DISTANCE) + consts::CAMERA_MIN_DISTANCE;
+    camera.aspectRatio = (f32) config.frameWidth / (f32) config.frameHeight;
 
     m_world.update();
 }
@@ -90,13 +98,8 @@ void Core::render() {
     glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(-camera.position, 0));
 
     // calculate projection matrix
-    f32 aspect_ratio = (f32) config.frameWidth / (f32) config.frameHeight;
-    glm::mat4 proj = glm::ortho<float>(
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * aspect_ratio * camera.distance,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * 0.5f * aspect_ratio * camera.distance,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * -0.5f * camera.distance,
-            consts::DEFAULT_CAMERA_FRUSTUM_HEIGHT * 0.5f * camera.distance
-    );
+    Aabb bounds = camera.getCameraSpaceFrustumAabb();
+    glm::mat4 proj = glm::ortho<f32>(bounds.min.x, bounds.max.x, bounds.min.y, bounds.max.y);
 
     // set view projection matrix
     m_spriteShader.setMat4("uViewProjectionMatrix", proj * view);
@@ -106,4 +109,8 @@ void Core::render() {
 
     // Draw world (tiles and entities)
     m_world.draw();
+
+    // Draw debug sprites
+    debugBatch.draw();
+    debugBatch.clear();
 }

@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "sprite_batch.h"
 #include "entity.h"
+#include "aabb.h"
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -28,6 +29,11 @@ public:
     void update();
 
     void draw();
+
+    [[nodiscard]] Aabb getAabb() const {
+        return Aabb(glm::vec2(m_chunkPosition) * glm::vec2(consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS,
+                    glm::vec2(m_chunkPosition + 1.0f) * glm::vec2(consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS);
+    }
 
 private:
     glm::vec2 m_chunkPosition = glm::vec2(0);

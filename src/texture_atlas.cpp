@@ -42,6 +42,17 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
     textureIndices[consts::MISSING_TEXTURE_NAME] = textureData.size();
     textureData.emplace_back(missingTextureData);
 
+    // Add white texture
+    u8 *whiteTextureData = (u8 *) calloc(w * h * 4, sizeof(u8));
+    if (!whiteTextureData) {
+        core->logFatal("Failed to allocate memory for missing texture data");
+    }
+    for (u32 i = 0; i < w * h * 4; ++i) {
+        whiteTextureData[i] = 255;
+    }
+    textureIndices[consts::WHITE_TEXTURE_NAME] = textureData.size();
+    textureData.emplace_back(whiteTextureData);
+
     // Add textures in given directory
     for (auto &p : std::filesystem::recursive_directory_iterator(dir)) {
         // Ignore non-png files

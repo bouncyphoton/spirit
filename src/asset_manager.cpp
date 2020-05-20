@@ -40,6 +40,10 @@ void AssetManager::destroy() {
     m_textureAtlas.destroy();
 }
 
+glm::vec4 AssetManager::getWhiteUv() {
+    return m_textureAtlas.getUv(consts::WHITE_TEXTURE_NAME);
+}
+
 glm::vec4 AssetManager::getTileUv(Tile &tile) {
     if (tile.id >= m_tileUvs.size()) {
         core->logWarn("Tried to get UV of unknown tile id: " + std::to_string(tile.id));

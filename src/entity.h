@@ -8,6 +8,8 @@
 
 enum EntityIdEnum : u32 {
     ENTITY_TEST_ID,
+    ENTITY_FLOWER_ID,
+    ENTITY_ROCK_ID,
     NUM_ENTITIES
 };
 

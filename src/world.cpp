@@ -5,9 +5,11 @@
 void World::init() {
     m_entitySpriteBatch.init();
 
+    s32 n = 5;
+
     // Add chunks, temp
-    for (s32 x = -2; x <= 2; ++x) {
-        for (s32 y = -2; y <= 2; ++y) {
+    for (s32 x = -n; x <= n; ++x) {
+        for (s32 y = -n; y <= n; ++y) {
             m_chunks.emplace_back();
             m_chunks.back().init();
             m_chunks.back().generate(glm::vec2(x, y));
@@ -31,12 +33,19 @@ void World::update() {
 }
 
 void World::draw() {
+    Aabb frustumAabb = core->camera.getWorldSpaceFrustumAabb();
+
+    // Draw chunks in view
     for (auto &chunk : m_chunks) {
-        chunk.draw();
+        if (frustumAabb.overlap(chunk.getAabb())) {
+            chunk.draw();
+            ++core->frameStats.chunksDrawn;
+        }
     }
 
     m_entitySpriteBatch.clear();
 
+    // Sort entities for correct overlaps
     std::sort(m_entities.begin(), m_entities.end(), [](Entity &a, Entity &b) {
         return a.position.y > b.position.y;
     });
@@ -45,5 +54,6 @@ void World::draw() {
                                       core->assetManager.getEntityUv(entity));
     }
 
+    // Draw entities
     m_entitySpriteBatch.draw();
 }
