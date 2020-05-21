@@ -39,7 +39,6 @@ void World::draw() {
     for (auto &chunk : m_chunks) {
         if (frustumAabb.overlap(chunk.getAabb())) {
             chunk.draw();
-            ++core->frameStats.chunksDrawn;
         }
     }
 

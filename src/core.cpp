@@ -6,6 +6,10 @@
 #include <cstdlib>
 #include <iostream>
 
+// ugh
+#undef min
+#undef max
+
 static Core core_local;
 Core *core = &core_local;
 
@@ -14,12 +18,15 @@ void Core::run() {
 
     logInfo("Initialized successfully");
 
+    platformEventFlags |= FRAME_RESIZED;
+
     // Main loop runs until quit() is called
     while (true) {
         m_platform.update();
 
-        if (frameResized) {
-            frameResized = false;
+        if (platformEventFlags & FRAME_RESIZED) {
+            platformEventFlags ^= FRAME_RESIZED;
+            camera.aspectRatio = (f32) config.frameWidth / (f32) config.frameHeight;
 
             // Update viewport
             glViewport(0, 0, config.frameWidth, config.frameHeight);
@@ -27,13 +34,9 @@ void Core::run() {
             logInfo("Resized to " + std::to_string(config.frameWidth) + "x" + std::to_string(config.frameHeight));
         }
 
-        frameStats = {};
-
         update();
 
         render();
-
-        logInfo(std::to_string(frameStats.chunksDrawn));
 
         m_platform.swapBuffers();
     }
@@ -75,6 +78,7 @@ void Core::init() {
 
 void Core::cleanup() {
     m_world.destroy();
+
     debugBatch.destroy();
     m_spriteShader.destroy();
     assetManager.destroy();
@@ -82,9 +86,28 @@ void Core::cleanup() {
 }
 
 void Core::update() {
-    camera.distance = (sin(SDL_GetTicks() / 1000.0f) * 0.5f + 0.5)
-                      * (consts::CAMERA_MAX_DISTANCE - consts::CAMERA_MIN_DISTANCE) + consts::CAMERA_MIN_DISTANCE;
-    camera.aspectRatio = (f32) config.frameWidth / (f32) config.frameHeight;
+    f32 dt = m_platform.getDeltaTime() / 60.0f * 2.4f;
+
+    // Temp input and delta time test
+
+    if (m_platform.isKeyDown(SDLK_w)) {
+        camera.position.y += 1.0f * dt;
+    }
+    if (m_platform.isKeyDown(SDLK_d)) {
+        camera.position.x += 1.0f * dt;
+    }
+    if (m_platform.isKeyDown(SDLK_s)) {
+        camera.position.y -= 1.0f * dt;
+    }
+    if (m_platform.isKeyDown(SDLK_a)) {
+        camera.position.x -= 1.0f * dt;
+    }
+    if (m_platform.isKeyDown(SDLK_q)) {
+        camera.distance = glm::min(consts::CAMERA_MAX_DISTANCE, camera.distance + 1.0f * dt);
+    }
+    if (m_platform.isKeyDown(SDLK_e)) {
+        camera.distance = glm::max(consts::CAMERA_MIN_DISTANCE, camera.distance - 1.0f * dt);
+    }
 
     m_world.update();
 }
@@ -94,14 +117,14 @@ void Core::render() {
 
     m_spriteShader.bind();
 
-    // calculate view matrix
+    // Calculate view matrix
     glm::mat4 view = glm::translate(glm::mat4(1), glm::vec3(-camera.position, 0));
 
-    // calculate projection matrix
+    // Calculate projection matrix
     Aabb bounds = camera.getCameraSpaceFrustumAabb();
     glm::mat4 proj = glm::ortho<f32>(bounds.min.x, bounds.max.x, bounds.min.y, bounds.max.y);
 
-    // set view projection matrix
+    // Set view projection matrix
     m_spriteShader.setMat4("uViewProjectionMatrix", proj * view);
 
     // Texture atlas is bound to texture unit 0

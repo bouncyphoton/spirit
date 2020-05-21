@@ -45,6 +45,20 @@ void Platform::destroy() {
 }
 
 void Platform::update() {
+    // Update delta time
+    auto prev = m_lastUpdate;
+    m_lastUpdate = std::chrono::system_clock::now();
+    m_frameTime = std::chrono::duration_cast<std::chrono::microseconds>(m_lastUpdate - prev).count() / 1000.0f;
+    m_deltaTime = m_frameTime / (1000.0f / consts::TARGET_HERTZ);
+
+    // Change "pressed" states to "down" states
+    for (auto &keyState : m_keyStates) {
+        if (keyState.second == KeyStateEnum::PRESSED) {
+            keyState.second = KeyStateEnum::DOWN;
+        }
+    }
+
+    // Poll events
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -54,17 +68,40 @@ void Platform::update() {
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        core->frameResized = true;
+                        core->platformEventFlags |= FRAME_RESIZED;
                         core->config.frameWidth = event.window.data1;
                         core->config.frameHeight = event.window.data2;
                         break;
                 }
+                break;
+            case SDL_KEYDOWN:
+                if (m_keyStates[event.key.keysym.sym] == KeyStateEnum::UP) {
+                    m_keyStates[event.key.keysym.sym] = KeyStateEnum::PRESSED;
+                }
+                break;
+            case SDL_KEYUP:
+                m_keyStates[event.key.keysym.sym] = KeyStateEnum::UP;
+                break;
         }
-
-        // TODO: process inputs
     }
 }
 
 void Platform::swapBuffers() {
     SDL_GL_SwapWindow(m_window);
+}
+
+f32 Platform::getDeltaTime() {
+    return m_deltaTime;
+}
+
+f32 Platform::getFrameTime() {
+    return m_frameTime;
+}
+
+bool Platform::isKeyPressed(u32 key) {
+    return m_keyStates[key] == KeyStateEnum::PRESSED;
+}
+
+bool Platform::isKeyDown(u32 key) {
+    return m_keyStates[key] != KeyStateEnum::UP;
 }

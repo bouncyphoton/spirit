@@ -10,8 +10,8 @@
 #include "world.h"
 #include <string>
 
-struct FrameStats {
-    u32 chunksDrawn = 0;
+enum PlatformEventEnum : u32 {
+    FRAME_RESIZED = 1
 };
 
 class Core {
@@ -28,12 +28,13 @@ public:
 
     void logWarn(const std::string &msg);
 
-    Config config = {};
-    FrameStats frameStats = {};
-    AssetManager assetManager;
+    Config config;
     Camera camera;
+    AssetManager assetManager;
+
+    u32 platformEventFlags;
     SpriteBatch debugBatch;
-    bool frameResized = true;
+
 private:
 
     void init();
