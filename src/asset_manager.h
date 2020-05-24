@@ -8,8 +8,6 @@
 
 class AssetManager {
 public:
-    AssetManager() = default;
-
     void init();
 
     void destroy();

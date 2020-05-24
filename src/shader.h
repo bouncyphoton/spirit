@@ -7,8 +7,6 @@
 
 class Shader {
 public:
-    Shader() = default;
-
     void init(const char *vertex_src, const char *fragment_src);
 
     void destroy();

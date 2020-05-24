@@ -11,8 +11,6 @@
 
 class Chunk {
 public:
-    Chunk() = default;
-
     void init();
 
     void destroy();

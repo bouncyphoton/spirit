@@ -16,8 +16,6 @@ enum PlatformEventEnum : u32 {
 
 class Core {
 public:
-    Core() = default;
-
     [[noreturn]] void run();
 
     [[noreturn]] void quit();

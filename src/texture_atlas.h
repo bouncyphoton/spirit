@@ -8,8 +8,6 @@
 
 class TextureAtlas {
 public:
-    TextureAtlas() = default;
-
     void init(const std::string &directory, s32 w, s32 h);
 
     void destroy();

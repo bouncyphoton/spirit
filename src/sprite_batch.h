@@ -13,8 +13,6 @@ struct Vertex {
 
 class SpriteBatch {
 public:
-    SpriteBatch() = default;
-
     void init();
 
     void destroy();

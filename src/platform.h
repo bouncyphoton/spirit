@@ -8,8 +8,6 @@
 
 class Platform {
 public:
-    Platform() = default;
-
     void init();
 
     void destroy();
