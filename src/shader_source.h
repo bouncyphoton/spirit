@@ -45,26 +45,30 @@ uniform float uTime;
 void main() {
     vec2 pos = floor(i.position * 16) / 16;
 
-    float t = (3.1415 * 0.5) * (cos(uTime) * 0.5 + 0.5);
-    vec2 lightPos = vec2(5, -1);
-    vec3 lightDir = normalize(vec3(cos(t), sin(t), 0));
+    float t = uTime;
+    vec2 lightPos = vec2(7, -1) + vec2(cos(t), sin(t)) * 5;
+    vec2 lightDir = normalize(vec2(-cos(t), -sin(t)));
 
     // surface normal vector
-    vec3 N = normalize(texture(uAtlas, i.normalUv).xyz * 2 - 1); // [0, 1] -> [-1, 1]
+    vec2 N = normalize(texture(uAtlas, i.normalUv).xy * 2 - 1); // [0, 1] -> [-1, 1]
 
     // vector pointing from point to light
-    vec3 L = normalize(vec3(lightPos - pos, 0));
+    vec2 L = normalize(vec2(lightPos - pos));
+
+    // TODO: find a better solution
+    // If there is no normal map, set N to L
+    N = mix(L, N, texture(uAtlas, i.normalUv).w);
 
     // Attenuation calculation
     float theta = dot(-L, lightDir);
     float dist = distance(pos, lightPos);
     float falloff = clamp((theta - 0.8) / 0.1, 0, 1);
     float cosTheta = max(0.1, dot(N, L));
-    float atten = 10 / (dist * dist + 1) * falloff * cosTheta;
+    float atten = 1 / (dist * dist + 1) * falloff * cosTheta;
 
-    vec4 color = texture(uAtlas, i.colorUv) * i.color;
-
-    oFragColor = color * atten;
+    vec4 textureColor = texture(uAtlas, i.colorUv);
+    vec3 color = pow(textureColor.xyz, vec3(2.2)) * i.color.xyz * atten;
+    oFragColor = vec4(pow(color, vec3(1/2.2)), textureColor.w * i.color.w);
 }
 )";
 
