@@ -18,6 +18,7 @@ public:
 
 private:
     u32 m_textureId = 0;
+    u32 m_textureExtraId = 0;
     std::unordered_map<std::string, glm::vec4> m_uvMap;
 };
 

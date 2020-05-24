@@ -23,7 +23,7 @@ void Chunk::generate(glm::vec2 chunk_position) {
 void Chunk::populate(std::vector<Entity> &entities) {
     for (u32 x = 0; x < consts::CHUNK_SIZE; ++x) {
         for (u32 y = 0; y < consts::CHUNK_SIZE; ++y) {
-            if (rand() % 10 == 0) {
+            if (rand() % 20 == 0) {
                 entities.emplace_back();
                 entities.back().id = rand() % 2 == 0 ? ENTITY_ROCK_ID : ENTITY_FLOWER_ID;
                 entities.back().frame = rand() % core->assetManager.getNumFrames(entities.back().id);
