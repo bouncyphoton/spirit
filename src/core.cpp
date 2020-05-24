@@ -130,8 +130,8 @@ void Core::render() {
     // Texture atlas is bound to texture unit 0
     m_spriteShader.setInt("uAtlas", 0);
 
-    // Atlas with additional data is bound to texture unit 1
-    m_spriteShader.setInt("uDataAtlas", 1);
+    // Set time uniform
+    m_spriteShader.setFloat("uTime", SDL_GetTicks() / 1000.0f);
 
     // Draw world (tiles and entities)
     m_world.draw();

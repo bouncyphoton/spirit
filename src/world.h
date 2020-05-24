@@ -3,6 +3,7 @@
 
 #include "sprite_batch.h"
 #include "chunk.h"
+#include "entity.h"
 #include <vector>
 
 class World {

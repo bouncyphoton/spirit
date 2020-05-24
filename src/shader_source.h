@@ -5,12 +5,14 @@
 
 const char *sprite_vertex_src = R"(#version 330 core
 layout (location = 0) in vec2 aPosition;
-layout (location = 1) in vec2 aUv;
-layout (location = 2) in vec4 aColor;
+layout (location = 1) in vec2 aColorUv;
+layout (location = 2) in vec2 aNormalUv;
+layout (location = 3) in vec4 aColor;
 
 out VertexData {
     vec2 position;
-    vec2 uv;
+    vec2 colorUv;
+    vec2 normalUv;
     vec4 color;
 } o;
 
@@ -18,7 +20,8 @@ uniform mat4 uViewProjectionMatrix;
 
 void main() {
     o.position = aPosition;
-    o.uv = aUv;
+    o.colorUv = aColorUv;
+    o.normalUv = aNormalUv;
     o.color = aColor;
 
     gl_Position = uViewProjectionMatrix * vec4(aPosition, 0, 1);
@@ -30,31 +33,38 @@ layout (location = 0) out vec4 oFragColor;
 
 in VertexData {
     vec2 position;
-    vec2 uv;
+    vec2 colorUv;
+    vec2 normalUv;
     vec4 color;
 } i;
 
 uniform sampler2D uAtlas;
-uniform sampler2D uDataAtlas;
+uniform float uTime;
 
+// TODO: Lots of temporary code here
 void main() {
-    vec4 data = texture(uDataAtlas, i.uv);
+    vec2 pos = floor(i.position * 16) / 16;
 
-    // Lots of temporary code here
-    vec3 N = normalize(data.xyz * 2 - 1); // [0, 1] -> [-1, 1]
-    vec3 L = -normalize(vec3(2, 1, -0.1));
-    vec2 lightPos = vec2(2, 10);
-    float cosTheta = max(0.1, dot(N, L));
+    float t = (3.1415 * 0.5) * (cos(uTime) * 0.5 + 0.5);
+    vec2 lightPos = vec2(5, -1);
+    vec3 lightDir = normalize(vec3(cos(t), sin(t), 0));
+
+    // surface normal vector
+    vec3 N = normalize(texture(uAtlas, i.normalUv).xyz * 2 - 1); // [0, 1] -> [-1, 1]
+
+    // vector pointing from point to light
+    vec3 L = normalize(vec3(lightPos - pos, 0));
 
     // Attenuation calculation
-    float theta = dot(L, -normalize(vec3(i.position - lightPos, 0)));
-    float dist = length(i.position - lightPos);
+    float theta = dot(-L, lightDir);
+    float dist = distance(pos, lightPos);
     float falloff = clamp((theta - 0.8) / 0.1, 0, 1);
-    float atten = 10 / (dist * dist + 1) * falloff;
+    float cosTheta = max(0.1, dot(N, L));
+    float atten = 10 / (dist * dist + 1) * falloff * cosTheta;
 
-    vec4 color = texture(uAtlas, i.uv) * i.color;
+    vec4 color = texture(uAtlas, i.colorUv) * i.color;
 
-    oFragColor = color * atten * mix(vec4(1), vec4(vec3(cosTheta), 1), data.w);
+    oFragColor = color * atten;
 }
 )";
 

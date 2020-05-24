@@ -9,7 +9,7 @@
 #include <filesystem>
 #include <vector>
 
-// TODO: Improve significantly, this is a HUGE mess
+// TODO: Improve significantly
 
 void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
     stbi_set_flip_vertically_on_load(1);
@@ -19,8 +19,8 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
         core->logFatal("Texture atlas directory is not valid");
     }
 
-    // Load texture data for textures we want (first is texture, second is extra data)
-    std::vector<std::pair<u8 *, u8 *>> textureData;
+    // Load texture data for textures we want
+    std::vector<u8 *> textureData;
     std::unordered_map<std::string, u32> textureIndices;
 
     // Allocate missing texture data
@@ -40,7 +40,7 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
     }
     // Add missing texture
     textureIndices[consts::MISSING_TEXTURE_NAME] = textureData.size();
-    textureData.emplace_back(missingTextureData, nullptr);
+    textureData.emplace_back(missingTextureData);
 
     // Add white texture
     u8 *whiteTextureData = (u8 *) calloc(w * h * 4, sizeof(u8));
@@ -51,7 +51,7 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
         whiteTextureData[i] = 255;
     }
     textureIndices[consts::WHITE_TEXTURE_NAME] = textureData.size();
-    textureData.emplace_back(whiteTextureData, nullptr);
+    textureData.emplace_back(whiteTextureData);
 
     // Add textures in given directory
     for (auto &p : std::filesystem::recursive_directory_iterator(dir)) {
@@ -60,38 +60,18 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
             continue;
         }
 
-        // Ignore files with "extra" in them, as we'll pick them up anyway
-        if (p.path().string().find("extra") != std::string::npos) {
-            continue;
-        }
-
         // Load texture data
         s32 currentW = 0, currentH = 0;
         u8 *data = stbi_load(p.path().u8string().c_str(), &currentW, &currentH, nullptr, 4);
-        u8 *extraData = nullptr;
-
-        std::string extraFileName = p.path().u8string().substr(
-                0, p.path().u8string().length() - p.path().extension().u8string().length())
-                                    + "_extra" + p.path().extension().u8string();
-        if (std::filesystem::exists(extraFileName)) {
-            s32 extraW, extraH;
-            extraData = stbi_load(extraFileName.c_str(), &extraW, &extraH, nullptr, 4);
-
-            if (currentW != extraW || currentH != extraH) {
-                // Make later check fail
-                currentW = w - 1;
-            }
-        }
 
         // Keep track of data if dimensions are correct, otherwise free
         if (currentW == w && currentH == h) {
             std::string textureName = p.path().string().substr(directory.length());
 
             textureIndices[textureName] = textureData.size();
-            textureData.emplace_back(data, extraData);
+            textureData.emplace_back(data);
         } else {
             free(data);
-            free(extraData);
         }
     }
 
@@ -103,16 +83,11 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
     assert(w == h);
     u32 sideLengthImages = ceil(sqrt(w * h * textureData.size()) / w);
     u32 sideLengthPixels = sideLengthImages * w;
-    u8 *atlasTextureData = (u8 *) calloc(sideLengthPixels * sideLengthPixels * 4, sizeof(u8)); // RGBA8 pixels
-    if (!atlasTextureData) {
-        core->logFatal("Failed to allocate memory for atlas texture data");
+    u8 *atlasData = (u8 *) malloc(sideLengthPixels * sideLengthPixels * 4); // RGBA8 pixels
+    if (!atlasData) {
+        core->logFatal("Failed to allocate memory for texture atlas");
     }
-
-    // This holds data like world-space normals
-    u8 *atlasExtraData = (u8 *) calloc(sideLengthPixels * sideLengthPixels * 4, sizeof(u8)); // RGBA8 pixels
-    if (!atlasExtraData) {
-        core->logFatal("Failed to allocate memory for atlas extra data");
-    }
+    memset(atlasData, 0, sideLengthPixels * sideLengthPixels * 4);
 
     // Set texture atlas data
     u32 atlasStride = sideLengthPixels * 4;
@@ -129,10 +104,7 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
             u32 ySrc = j / (w * 4);
 
             u32 atlasIndex = currentStartIdx + xSrc + ySrc * atlasStride;
-            atlasTextureData[atlasIndex] = textureData[i].first[j];
-            if (textureData[i].second) {
-                atlasExtraData[atlasIndex] = textureData[i].second[j];
-            }
+            atlasData[atlasIndex] = textureData[i][j];
         }
     }
 
@@ -152,47 +124,26 @@ void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
         ) / glm::vec4(sideLengthImages);
     }
 
-    // Create main texture atlas
-    {
-        // Generate OpenGL texture
-        glGenTextures(1, &m_textureId);
-        if (m_textureId == 0) {
-            core->logFatal("Failed to generate texture atlas OpenGL texture");
-        }
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_textureId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sideLengthPixels, sideLengthPixels, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     atlasTextureData);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // Generate OpenGL texture
+    glGenTextures(1, &m_textureId);
+    if (m_textureId == 0) {
+        core->logFatal("Failed to generate texture atlas OpenGL texture");
     }
-
-    // Create extra data atlas
-    {
-        // Generate OpenGL texture
-        glGenTextures(1, &m_textureExtraId);
-        if (m_textureExtraId == 0) {
-            core->logFatal("Failed to generate texture data atlas OpenGL texture");
-        }
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_textureExtraId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sideLengthPixels, sideLengthPixels, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     atlasExtraData);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    }
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sideLengthPixels, sideLengthPixels, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 atlasData);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     // Free data
-    free(atlasTextureData);
-    free(atlasExtraData);
+    free(atlasData);
     for (auto &data : textureData) {
-        free(data.first);
-        free(data.second);
+        free(data);
     }
 }
 
 void TextureAtlas::destroy() {
-    glDeleteTextures(1, &m_textureExtraId);
     glDeleteTextures(1, &m_textureId);
 }
 

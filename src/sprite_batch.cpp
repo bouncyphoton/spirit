@@ -21,10 +21,13 @@ void SpriteBatch::init() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, position));
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, uv));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, colorUv));
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, color));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, normalUv));
+
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *) offsetof(Vertex, color));
 
     glBindVertexArray(0);
 }
@@ -34,11 +37,14 @@ void SpriteBatch::destroy() {
     glDeleteVertexArrays(1, &m_vao);
 }
 
-void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec4 uv, glm::vec4 tint) {
-    Vertex v0{p0, glm::vec2(uv.x, uv.y), tint};
-    Vertex v1{p1, glm::vec2(uv.z, uv.y), tint};
-    Vertex v2{p2, glm::vec2(uv.z, uv.w), tint};
-    Vertex v3{p3, glm::vec2(uv.x, uv.w), tint};
+void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3,
+                            const Sprite &sprite, glm::vec4 tint) {
+    glm::vec4 cUv = sprite.colorUv;
+    glm::vec4 nUv = sprite.normalUv;
+    Vertex v0{p0, glm::vec2(cUv.x, cUv.y), glm::vec2(nUv.x, nUv.y), tint};
+    Vertex v1{p1, glm::vec2(cUv.z, cUv.y), glm::vec2(nUv.z, nUv.y), tint};
+    Vertex v2{p2, glm::vec2(cUv.z, cUv.w), glm::vec2(nUv.z, nUv.w), tint};
+    Vertex v3{p3, glm::vec2(cUv.x, cUv.w), glm::vec2(nUv.x, nUv.w), tint};
 
     // TODO: to optimize performance, move away from std::vector
 
@@ -51,12 +57,12 @@ void SpriteBatch::addSprite(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 
     m_vertices.emplace_back(v3);
 }
 
-void SpriteBatch::addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, glm::vec4 uv, glm::vec4 tint) {
+void SpriteBatch::addSprite(glm::vec2 bottom_left, glm::vec2 dimensions, const Sprite &sprite, glm::vec4 tint) {
     addSprite(bottom_left,
               bottom_left + glm::vec2(dimensions.x, 0),
               bottom_left + dimensions,
               bottom_left + glm::vec2(0, dimensions.y),
-              uv, tint);
+              sprite, tint);
 }
 
 void SpriteBatch::draw() {

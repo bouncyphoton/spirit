@@ -17,6 +17,8 @@ public:
 
     void setInt(const std::string &uniform_name, s32 value);
 
+    void setFloat(const std::string &uniform_name, f32 value);
+
 private:
     static void checkCompileStatus(u32 shader);
 

@@ -50,7 +50,7 @@ void World::draw() {
     });
     for (auto &entity : m_entities) {
         m_entitySpriteBatch.addSprite(entity.position, entity.dimensions,
-                                      core->assetManager.getEntityUv(entity));
+                                      core->assetManager.getSprite(entity.spriteName));
     }
 
     // Draw entities
