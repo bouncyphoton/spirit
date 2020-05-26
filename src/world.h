@@ -2,6 +2,7 @@
 #define SPIRIT_WORLD_H
 
 #include "sprite_batch.h"
+#include "entity.h"
 #include "chunk.h"
 #include <vector>
 

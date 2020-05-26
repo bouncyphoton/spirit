@@ -1,10 +1,10 @@
 #ifndef SPIRIT_ASSET_MANAGER_H
 #define SPIRIT_ASSET_MANAGER_H
 
-#include "tile.h"
-#include "entity.h"
 #include "texture_atlas.h"
 #include <glm/glm.hpp>
+
+// TODO: we want 0 to be missing texture for easier debugging
 
 class AssetManager {
 public:
@@ -14,20 +14,15 @@ public:
 
     void destroy();
 
-    glm::vec4 getWhiteUv();
+    glm::vec4 getUv(u32 spriteId, u32 variant = 0);
 
-    glm::vec4 getTileUv(Tile &tile);
-
-    u8 getNumVariants(TileIdEnum id);
-
-    glm::vec4 getEntityUv(Entity &entity);
-
-    u8 getNumFrames(EntityIdEnum id);
+    u32 getNumVariants(u32 spriteId);
 
 private:
     TextureAtlas m_textureAtlas;
-    std::vector<std::vector<glm::vec4>> m_tileUvs;
-    std::vector<std::vector<glm::vec4>> m_entityUvs;
+
+    // first index is id, second index is variant
+    std::vector<std::vector<glm::vec4>> m_uvs;
 };
 
 #endif //SPIRIT_ASSET_MANAGER_H

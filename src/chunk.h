@@ -1,11 +1,11 @@
 #ifndef SPIRIT_CHUNK_H
 #define SPIRIT_CHUNK_H
 
-#include "tile.h"
 #include "constants.h"
 #include "sprite_batch.h"
-#include "entity.h"
 #include "aabb.h"
+#include "entity.h"
+#include "tile.h"
 #include <glm/glm.hpp>
 #include <vector>
 

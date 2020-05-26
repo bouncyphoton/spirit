@@ -1,6 +1,8 @@
 #ifndef SPIRIT_CONSTANTS_H
 #define SPIRIT_CONSTANTS_H
 
+#include "types.h"
+
 namespace consts {
     static constexpr u32 OPENGL_VERSION_MAJOR = 3;
     static constexpr u32 OPENGL_VERSION_MINOR = 3;
