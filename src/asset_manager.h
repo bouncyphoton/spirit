@@ -4,8 +4,6 @@
 #include "texture_atlas.h"
 #include <glm/glm.hpp>
 
-// TODO: we want 0 to be missing texture for easier debugging
-
 class AssetManager {
 public:
     AssetManager() = default;

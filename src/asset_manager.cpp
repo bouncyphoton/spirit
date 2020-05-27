@@ -5,8 +5,16 @@
 void AssetManager::init() {
     m_textureAtlas.init("../assets/", 16, 16);
 
-    u32 numSprites = sizeof(spriteMetadata) / sizeof(spriteMetadata[0]);
-    for (u32 i = 0; i < numSprites; ++i) {
+    // Built in sprites are a special case
+    for (u32 i = 0; i < NUM_BUILT_IN_SPRITES; ++i) {
+        assert(i == spriteMetadata[i].id);
+        m_uvs.emplace_back();
+
+        m_uvs.back().emplace_back(m_textureAtlas.getUv(spriteMetadata[i].textureBaseName));
+    }
+
+    // Non-built in sprites
+    for (u32 i = NUM_BUILT_IN_SPRITES; i < NUM_SPRITES; ++i) {
         assert(i == spriteMetadata[i].id);
         m_uvs.emplace_back();
 

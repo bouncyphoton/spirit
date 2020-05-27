@@ -150,7 +150,7 @@ void TextureAtlas::destroy() {
 glm::vec4 TextureAtlas::getUv(const std::string &name) {
     if (m_uvMap.find(name) == m_uvMap.end()) {
         core->logWarn("Texture \"" + name + "\" not found in atlas");
-        m_uvMap[name] = m_uvMap["*missing"];
+        m_uvMap[name] = m_uvMap[consts::MISSING_TEXTURE_NAME];
     }
     return m_uvMap[name];
 }

@@ -3,9 +3,7 @@
 #include "core.h"
 
 // TODO: load config from file
-// TODO: load tile ids from file
-// TODO: load entity ids from file
-// TODO: shadows
+// TODO: load sprite data from file
 
 int main(int argc, char *argv[]) {
     core->run();

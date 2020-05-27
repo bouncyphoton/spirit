@@ -60,13 +60,13 @@ void Chunk::draw() {
     m_tileSpriteBatch.draw();
 
     // Draw outlines
-//    core->debugBatch.addSprite(m_chunkPosition * glm::vec2(consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS,
-//                               glm::vec2(consts::CHUNK_SIZE, 1.0 / 16.0f) * consts::TILE_SIZE_METERS,
-//                               core->assetManager.getWhiteUv(),
-//                               glm::vec4(1, 0, 0, 1));
-//
-//    core->debugBatch.addSprite(m_chunkPosition * glm::vec2(consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS,
-//                               glm::vec2(1.0 / 16.0f, consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS,
-//                               core->assetManager.getWhiteUv(),
-//                               glm::vec4(1, 0, 0, 1));
+    core->debugBatch.addSprite(m_chunkPosition * glm::vec2(consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS,
+                               glm::vec2(consts::CHUNK_SIZE, 1.0 / 16.0f) * consts::TILE_SIZE_METERS,
+                               core->assetManager.getUv(SPRITE_WHITE),
+                               glm::vec4(1, 0, 0, 1));
+
+    core->debugBatch.addSprite(m_chunkPosition * glm::vec2(consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS,
+                               glm::vec2(1.0 / 16.0f, consts::CHUNK_SIZE) * consts::TILE_SIZE_METERS,
+                               core->assetManager.getUv(SPRITE_WHITE),
+                               glm::vec4(1, 0, 0, 1));
 }
