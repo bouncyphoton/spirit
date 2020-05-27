@@ -9,130 +9,153 @@
 #include <filesystem>
 #include <vector>
 
-// TODO: Improve significantly
-
-void TextureAtlas::init(const std::string &directory, s32 w, s32 h) {
-    stbi_set_flip_vertically_on_load(1);
+void TextureAtlas::init(const std::string &directory, s32 textureSideLength) {
+    if (textureSideLength <= 0) {
+        core->logFatal("Cannot create texture atlas out of textures with non-positive sides");
+    }
 
     std::filesystem::path dir(directory);
     if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
         core->logFatal("Texture atlas directory is not valid");
     }
 
-    // Load texture data for textures we want
+    // Useful variables
+    u32 bytesPerPixel = 4;
+    u32 textureStride = textureSideLength * bytesPerPixel;
+    u32 bytesPerTexture = textureStride * textureSideLength;
+
+    // Holds texture data while we're creating our atlas
     std::vector<u8 *> textureData;
-    std::unordered_map<std::string, u32> textureIndices;
+    std::vector<std::string> textureNames;
 
-    // Allocate missing texture data
-    u8 *missingTextureData = (u8 *) calloc(w * h * 4, sizeof(u8));
-    if (!missingTextureData) {
-        core->logFatal("Failed to allocate memory for missing texture data");
-    }
-    // Generate missing texture data
-    for (u32 i = 0; i < w * h * 4; i += 4) {
-        u32 x = (i / 4) % w;
-        u32 y = (i / 4) / w;
-        missingTextureData[i + 3] = 255;
-        if ((x >= w / 2 && y < h / 2) || (x < w / 2 && y >= h / 2)) {
-            missingTextureData[i + 0] = 255;
-            missingTextureData[i + 2] = 255;
+    // Not entirely necessary, but minimizes typos
+    auto addTexture = [&](const char *textureName, u8 *data) {
+        textureNames.emplace_back(textureName);
+        textureData.emplace_back(data);
+    };
+
+    // Missing texture
+    {
+        // Allocate memory
+        u8 *missingTextureData = (u8 *) calloc(bytesPerTexture, sizeof(u8));
+        if (!missingTextureData) {
+            core->logFatal("Failed to allocate memory for missing texture data");
         }
-    }
-    // Add missing texture
-    textureIndices[consts::MISSING_TEXTURE_NAME] = textureData.size();
-    textureData.emplace_back(missingTextureData);
 
-    // Add white texture
-    u8 *whiteTextureData = (u8 *) calloc(w * h * 4, sizeof(u8));
-    if (!whiteTextureData) {
-        core->logFatal("Failed to allocate memory for missing texture data");
-    }
-    for (u32 i = 0; i < w * h * 4; ++i) {
-        whiteTextureData[i] = 255;
-    }
-    textureIndices[consts::WHITE_TEXTURE_NAME] = textureData.size();
-    textureData.emplace_back(whiteTextureData);
+        // Set data
+        for (u32 i = 0; i < bytesPerTexture; i += bytesPerPixel) {
+            u32 x = (i / bytesPerPixel) % textureSideLength;
+            u32 y = (i / bytesPerPixel) / textureSideLength;
 
-    // Add textures in given directory
+            missingTextureData[i + 3] = 255;
+            if ((x >= textureSideLength / 2 && y < textureSideLength / 2)
+                || (x < textureSideLength / 2 && y >= textureSideLength / 2)) {
+                missingTextureData[i + 0] = 255;
+                missingTextureData[i + 2] = 255;
+            }
+        }
+
+        // Add texture, we don't want to free our data until the end
+        addTexture(consts::MISSING_TEXTURE_NAME, missingTextureData);
+    }
+
+    // White texture
+    {
+        // Allocate memory
+        u8 *whiteTextureData = (u8 *) malloc(bytesPerTexture * sizeof(u8));
+        if (!whiteTextureData) {
+            core->logFatal("Failed to allocate memory for missing texture data");
+        }
+
+        // Set data
+        memset(whiteTextureData, 255, bytesPerTexture * sizeof(u8));
+
+        // Add texture
+        addTexture(consts::WHITE_TEXTURE_NAME, whiteTextureData);
+    }
+
+    // Load textures from assets directory
+    stbi_set_flip_vertically_on_load(1);
+
+    // Iterate asset directory recursively
     for (auto &p : std::filesystem::recursive_directory_iterator(dir)) {
-        // Ignore non-png files
+        // Ignore files with incorrect extension
         if (p.path().extension() != consts::TEXTURE_EXTENSION) {
             continue;
         }
 
+        std::string pathStr = p.path().string();
+        std::string textureName = pathStr.substr(directory.length());
+
         // Load texture data
-        s32 currentW = 0, currentH = 0;
-        u8 *data = stbi_load(p.path().u8string().c_str(), &currentW, &currentH, nullptr, 4);
+        s32 w, h;
+        u8 *data = stbi_load(pathStr.c_str(), &w, &h, nullptr, bytesPerPixel);
 
-        // Keep track of data if dimensions are correct, otherwise free
-        if (currentW == w && currentH == h) {
-            std::string textureName = p.path().string().substr(directory.length());
-
-            textureIndices[textureName] = textureData.size();
-            textureData.emplace_back(data);
-        } else {
+        // Skip non-square textures or textures with incorrect side lengths
+        if (w != h || w != textureSideLength) {
             free(data);
+            continue;
         }
+
+        addTexture(textureName.c_str(), data);
     }
 
-    core->logInfo("Creating texture atlas with " + std::to_string(textureData.size()) + " "
-                  + std::to_string(w) + "x" + std::to_string(h) + " textures");
+    // Generate texture atlas
+    core->logInfo("Creating texture atlas with "
+                  + std::to_string(textureData.size()) + " "
+                  + std::to_string(textureSideLength) + "x" + std::to_string(textureSideLength)
+                  + " textures");
 
-    // Generate texture data
-    // TODO: assume textures are square for now
-    assert(w == h);
-    u32 sideLengthImages = ceil(sqrt(w * h * textureData.size()) / w);
-    u32 sideLengthPixels = sideLengthImages * w;
-    u8 *atlasData = (u8 *) malloc(sideLengthPixels * sideLengthPixels * 4); // RGBA8 pixels
+    // Calculate how large the atlas is
+    u32 atlasTexturesPerSide = ceil(sqrtf(textureData.size()));
+    u32 atlasSideLength = atlasTexturesPerSide * textureSideLength;
+    u32 atlasStride = atlasSideLength * bytesPerPixel;
+
+    // One quarter of a texel
+    f32 uvEpsilon = 1.0f / (atlasSideLength * 4.0f);
+
+    // Allocate memory for the atlas
+    u8 *atlasData = (u8 *) calloc(atlasSideLength * atlasStride, sizeof(u8));
     if (!atlasData) {
         core->logFatal("Failed to allocate memory for texture atlas");
     }
-    memset(atlasData, 0, sideLengthPixels * sideLengthPixels * 4);
 
-    // Set texture atlas data
-    u32 atlasStride = sideLengthPixels * 4;
+    // Iterate over all our textures
     for (u32 i = 0; i < textureData.size(); ++i) {
-        // x and y coordinates for current texture in atlas
-        u32 x = i % (sideLengthImages);
-        u32 y = (sideLengthImages) - 1 - i / (sideLengthImages);
+        // Turn flat texture index to 2D coordinate
+        u32 textureX = i % atlasTexturesPerSide;
+        u32 textureY = i / atlasTexturesPerSide;
 
-        u32 currentStartIdx = y * h * atlasStride + x * w * 4;
+        // Set UV coordinates
+        m_uvMap[textureNames[i]] = glm::vec4(
+                textureX + uvEpsilon,
+                textureY + uvEpsilon,
+                textureX + 1.0f - uvEpsilon,
+                textureY + 1.0f - uvEpsilon
+        ) / glm::vec4(atlasTexturesPerSide);
 
-        // Iterate over each pixel component in texture
-        for (u32 j = 0; j < w * h * 4; ++j) {
-            u32 xSrc = j % (w * 4);
-            u32 ySrc = j / (w * 4);
+        // Get pointers to destination in atlas data and source texture data
+        u8 *dst = atlasData
+                  + textureX * textureStride
+                  + textureY * atlasStride * textureSideLength;
+        u8 *src = textureData[i];
 
-            u32 atlasIndex = currentStartIdx + xSrc + ySrc * atlasStride;
-            atlasData[atlasIndex] = textureData[i][j];
+        // Copy texture data
+        for (u32 j = 0; j < textureSideLength; ++j) {
+            memcpy(dst, src, textureStride);
+            src += textureStride;
+            dst += atlasStride;
         }
     }
 
-    // Get uvs for textures in atlas
-    const f32 UV_EPSILON = 1.0f / sideLengthPixels / 4.0f;
-    for (auto &t : textureIndices) {
-        u32 i = t.second;
-        u32 x = i % (sideLengthImages);
-        u32 y = (sideLengthImages) - 1 - i / (sideLengthImages);
-
-
-        m_uvMap[t.first] = glm::vec4(
-                x + UV_EPSILON,
-                y + UV_EPSILON,
-                x + 1.0f - UV_EPSILON,
-                y + 1.0f - UV_EPSILON
-        ) / glm::vec4(sideLengthImages);
-    }
-
-    // Generate OpenGL texture
+    // Send atlas texture to the GPU and bind to texture unit 0
     glGenTextures(1, &m_textureId);
     if (m_textureId == 0) {
-        core->logFatal("Failed to generate texture atlas OpenGL texture");
+        core->logFatal("Failed to generate OpenGL texture for texture atlas");
     }
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sideLengthPixels, sideLengthPixels, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 atlasData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlasSideLength, atlasSideLength, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlasData);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 

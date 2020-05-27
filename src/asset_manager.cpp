@@ -3,7 +3,7 @@
 #include "constants.h"
 
 void AssetManager::init() {
-    m_textureAtlas.init("../assets/", 16, 16);
+    m_textureAtlas.init("../assets/", 16);
 
     // Built in sprites are a special case
     for (u32 i = 0; i < NUM_BUILT_IN_SPRITES; ++i) {

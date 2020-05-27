@@ -6,14 +6,16 @@
 #include <string>
 #include <unordered_map>
 
+/// Texture atlas made up of square textures
 class TextureAtlas {
 public:
     TextureAtlas() = default;
 
-    void init(const std::string &directory, s32 w, s32 h);
+    void init(const std::string &directory, s32 textureSideLength);
 
     void destroy();
 
+    // Get uv coordinates (min, max) of texture if it exists, otherwise get missing texture
     glm::vec4 getUv(const std::string &name);
 
 private:
