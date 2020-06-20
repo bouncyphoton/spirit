@@ -3,6 +3,7 @@
 
 #include "texture_atlas.h"
 #include <glm/glm.hpp>
+#include <vector>
 
 class AssetManager {
 public:

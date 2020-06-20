@@ -23,7 +23,7 @@ enum SpriteEnum {
     NUM_SPRITES
 };
 
-const static SpriteMetadata spriteMetadata[] = {
+constexpr static SpriteMetadata spriteMetadata[] = {
         {SPRITE_MISSING, 1, consts::MISSING_TEXTURE_NAME},
         {SPRITE_WHITE,   1, consts::WHITE_TEXTURE_NAME},
         {SPRITE_GRASS,   1, "grass"},
